@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حاسبة الأرباح التراكمية | إصدار ابو الموت </title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root {
+    --primary: #8e44ad;
+    --secondary: #3498db;
+    --success: #2ecc71;
+    --danger: #e74c3c;
+    --dark: #2c3e50;
+    --light: #ecf0f1;
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Tajawal', sans-serif;
+  }
+  
+  body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .container {
+    width: 100%;
+    max-width: 1000px;
+    animation: fadeIn 0.5s ease;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* تسجيل الدخول */
+  #loginContainer {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+  
+  #loginContainer:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  }
+  
+  #loginContainer h2 {
+    color: var(--primary);
+    margin-bottom: 25px;
+    font-size: 1.8rem;
+    position: relative;
+    display: inline-block;
+  }
+  
+  #loginContainer h2:after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    background: var(--secondary);
+    border-radius: 3px;
+  }
+  
+  #loginContainer input {
+    width: 100%;
+    padding: 15px;
+    margin: 12px 0;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+    font-size: 1rem;
+    transition: all 0.3s;
+  }
+  
+  #loginContainer input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(142, 68, 173, 0.2);
+    outline: none;
+  }
+  
+  #loginContainer button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+  
+  #loginContainer button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 20px rgba(0,0,0,0.15);
+    background: linear-gradient(to right, var(--secondary), var(--primary));
+  }
+  
+  #loginError {
+    color: var(--danger);
+    margin: 15px 0;
+    min-height: 20px;
+    font-weight: 500;
+  }
+  
+  #contactInfo {
+    font-size: 0.9rem;
+    color: #555;
+    margin-top: 20px;
+  }
+  
+  #contactInfo a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 700;
+    transition: all 0.3s;
+  }
+  
+  #contactInfo a:hover {
+    color: var(--secondary);
+    text-decoration: underline;
+  }
+  
+  /* الحاسبة */
+  #mainContainer {
+    display: none;
+    animation: fadeIn 0.7s ease;
+  }
+  
+  .card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin: 20px 0;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+  }
+  
+  h1, h3 {
+    color: var(--primary);
+    text-align: center;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  
+  h1 {
+    font-size: 1.8rem;
+    padding-bottom: 15px;
+  }
+  
+  h1:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 4px;
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    border-radius: 2px;
+  }
+  
+  .input-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+  }
+  
+  .input-group label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;
+    color: var(--dark);
+  }
+  
+  .input-group input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+    font-size: 1rem;
+    transition: all 0.3s;
+  }
+  
+  .input-group input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(142, 68, 173, 0.2);
+    outline: none;
+  }
+  
+  .input-group button {
+    grid-column: span 2;
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+  
+  .input-group button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 20px rgba(0,0,0,0.15);
+    background: linear-gradient(to right, var(--secondary), var(--primary));
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+    font-size: 0.95rem;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  }
+ 
+  th, td {
+    padding: 15px 10px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  th {
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    color: white;
+    position: sticky;
+    top: 0;
+    font-weight: 600;
+  }
+  
+  tr:nth-child(even) {
+    background: rgba(236, 240, 241, 0.5);
+  }
+  
+  .profit {
+    background-color: rgba(46, 204, 113, 0.15);
+    color: #155724;
+    font-weight: 600;
+  }
+  
+  .loss {
+    background-color: rgba(231, 76, 60, 0.15);
+    color: #721c24;
+    font-weight: 600;
+  }
+  
+  .current-day {
+    border: 2px solid var(--danger);
+    animation: pulse 1.5s infinite;
+  }
+  
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+  }
+  
+  .chart-container {
+    width: 100%;
+    height: 450px;
+    margin-top: 25px;
+  }
+  
+  #logoutBtn {
+    background: linear-gradient(to right, var(--danger), #f39c12);
+    margin-top: 15px;
+  }
+  
+  #logoutBtn:hover {
+    background: linear-gradient(to right, #c0392b, #e67e22);
+  }
+  
+  .lot-display {
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 1.1rem;
+    margin-top: 5px;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .input-group {
+      grid-template-columns: 1fr;
+    }
+    
+    .input-group button {
+      grid-column: span 1;
+    }
+    
+    h1 {
+      font-size: 1.5rem;
+    }
+    
+    th, td {
+      padding: 12px 5px;
+      font-size: 0.85rem;
+    }
+    
+    .chart-container {
+      height: 350px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- تسجيل الدخول -->
+  <div id="loginContainer">
+    <h2>🚀 نظام ابو الموت المالي </h2>
+    <input type="text" id="username" placeholder="اسم المستخدم" />
+    <input type="password" id="password" placeholder="كلمة المرور" />
+    <button onclick="login()">الدخول للنظام</button>
+    <p id="loginError"></p>
+    <p id="contactInfo">للحصول على صلاحية الدخول تواصل مع <a href="https://t.me/Mydo771" target="_blank">@Mydo771</a></p>
+  </div>
+
+  <!-- الحاسبة -->
+  <div id="mainContainer">
+    <div class="card">
+      <h1>💰 حاسبة الأرباح التراكمية | إصدار ابو الموت</h1>
+      <div class="input-group">
+        <div>
+          <label>رأس المال الأولي ($):</label>
+          <input type="number" id="initialCapital" value="1000" oninput="updateLot()">
+          <p class="lot-display">اللوت: <span id="lotDisplay">0.10</span></p>
+        </div>
+        <div>
+          <label>عدد الأيام:</label>
+          <input type="number" id="days" value="30" min="1" max="365">
+        </div>
+        <div>
+          <label>نسبة الربح اليومي (%):</label>
+          <input type="number" id="dailyProfit" value="1" step="0.1">
+        </div>
+        <div>
+          <label>اليوم الحالي (اختياري):</label>
+          <input type="number" id="currentDay" min="1" placeholder="أدخل اليوم الحالي">
+        </div>
+        <button onclick="generateTable()">إنشاء التقرير والرسم البياني</button>
+        <button id="logoutBtn" onclick="logout()">تسجيل خروج </button>
+      </div>
+    </div>
+
+    <div class="card" id="summary"></div>
+    <div class="card chart-container">
+      <canvas id="profitChart"></canvas>
+    </div>
+    <div class="card" id="tableContainer"></div>
+  </div>
+
+</div>
+
+<script>
+const correctUsername = "@Mydo771";
+const correctPassword = "@Mydo771";
+let profitChart = null;
+
+window.onload = function() {
+  document.getElementById("loginContainer").style.display = "block";
+  document.getElementById("mainContainer").style.display = "none";
+  loadSettings();
+  updateLot();
+}
+
+function login() {
+  const user = document.getElementById("username").value.trim();
+  const pass = document.getElementById("password").value.trim();
+  const loginError = document.getElementById("loginError");
+  
+  if(user === correctUsername && pass === correctPassword) {
+    loginError.textContent = "";
+    document.getElementById("loginContainer").style.display = "none";
+    document.getElementById("mainContainer").style.display = "block";
+    generateTable();
+    
+    // تأثير دخول ناري 😈
+    document.getElementById("mainContainer").style.animation = "fadeIn 0.7s ease";
+  } else {
+    loginError.textContent = "❌ اسم المستخدم أو كلمة المرور غير صحيحة!";
+    // تأثير اهتزاز عند الخطأ
+    loginError.style.animation = "shake 0.5s";
+    setTimeout(() => loginError.style.animation = "", 500);
+  }
+}
+
+function logout() {
+  document.getElementById("mainContainer").style.display = "none";
+  document.getElementById("loginContainer").style.display = "block";
+  document.getElementById("username").value = "";
+  document.getElementById("password").value = "";
+  document.getElementById("loginError").textContent = "";
+  
+  // تأثير خروج
+  document.getElementById("loginContainer").style.animation = "fadeIn 0.5s ease";
+}
+
+function saveSettings() {
+  localStorage.setItem("initialCapital", document.getElementById("initialCapital").value);
+  localStorage.setItem("days", document.getElementById("days").value);
+  localStorage.setItem("dailyProfit", document.getElementById("dailyProfit").value);
+  localStorage.setItem("currentDay", document.getElementById("currentDay").value);
+}
+
+function loadSettings() {
+  const initialCapital = localStorage.getItem("initialCapital");
+  const days = localStorage.getItem("days");
+  const dailyProfit = localStorage.getItem("dailyProfit");
+  const currentDay = localStorage.getItem("currentDay");
+  
+  if(initialCapital) document.getElementById("initialCapital").value = initialCapital;
+  if(days) document.getElementById("days").value = days;
+  if(dailyProfit) document.getElementById("dailyProfit").value = dailyProfit;
+  if(currentDay) document.getElementById("currentDay").value = currentDay;
+}
+
+function updateLot() {
+  const capital = parseFloat(document.getElementById("initialCapital").value) || 0;
+  const lot = Math.floor(capital / 100) * 0.01;
+  document.getElementById("lotDisplay").textContent = lot.toFixed(2);
+}
+
+function generateTable() {
+  saveSettings();
+  const initialCapital = parseFloat(document.getElementById("initialCapital").value);
+  const days = parseInt(document.getElementById("days").value);
+  const dailyProfitPercent = parseFloat(document.getElementById("dailyProfit").value) / 100;
+  const currentDay = parseInt(document.getElementById("currentDay").value) || 0;
+
+  let tableHTML = `
+    <div style="overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>اليوم</th>
+            <th>راس المال</th>
+            <th>اللوت</th>
+            <th>الربح</th>
+            <th>راس المال+الربح</th>
+            <th>%</th>
+          </tr>
+        </thead>
+        <tbody>`;
+  
+  let currentCapital = initialCapital;
+  let chartData = { labels: [], capitals: [], profits: [] };
+
+  for(let day = 1; day <= days; day++) {
+    const dailyGain = currentCapital * dailyProfitPercent;
+    const newCapital = currentCapital + dailyGain;
+    const cumulativeRate = (newCapital - initialCapital) / initialCapital;
+    const isCurrentDay = day === currentDay;
+    const rowClass = isCurrentDay ? "current-day" : "";
+    const lot = Math.floor(newCapital / 100) * 0.01; 
+
+    tableHTML += `
+      <tr class="${rowClass} profit">
+        <td>${day}</td>
+        <td>${currentCapital.toFixed(2)}</td>
+        <td>${lot.toFixed(2)}</td>
+        <td>+${dailyGain.toFixed(2)}</td>
+        <td>${newCapital.toFixed(2)}</td>
+        <td>${(cumulativeRate * 100).toFixed(2)}%</td>
+      </tr>`;
+
+    chartData.labels.push(`اليوم ${day}`);
+    chartData.capitals.push(newCapital);
+    chartData.profits.push(dailyGain);
+    currentCapital = newCapital;
+  }
+  
+  tableHTML += `</tbody></table></div>`;
+
+  const summaryHTML = `
+    <h3>📊 ملخص النتائج بعد ${days} يومًا</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+      <div style="background: rgba(142, 68, 173, 0.1); padding: 15px; border-radius: 10px; border-left: 4px solid var(--primary);">
+        <p style="font-weight: 600; color: var(--primary);">رأس المال الأولي:</p>
+        <p style="font-size: 1.2rem; font-weight: 700;">${initialCapital.toFixed(2)} $</p>
+      </div>
+      <div style="background: rgba(46, 204, 113, 0.1); padding: 15px; border-radius: 10px; border-left: 4px solid var(--success);">
+        <p style="font-weight: 600; color: var(--success);">رأس المال النهائي:</p>
+        <p style="font-size: 1.2rem; font-weight: 700;">${currentCapital.toFixed(2)} $</p>
+      </div>
+      <div style="background: rgba(52, 152, 219, 0.1); padding: 15px; border-radius: 10px; border-left: 4px solid var(--secondary);">
+        <p style="font-weight: 600; color: var(--secondary);">إجمالي الأرباح:</p>
+        <p style="font-size: 1.2rem; font-weight: 700;">${(currentCapital - initialCapital).toFixed(2)} $ (${((currentCapital - initialCapital) / initialCapital * 100).toFixed(2)}%)</p>
+      </div>
+    </div>`;
+
+  document.getElementById("tableContainer").innerHTML = tableHTML;
+  document.getElementById("summary").innerHTML = summaryHTML;
+  createChart(chartData, currentDay);
+}
+
+function createChart(data, currentDay) {
+  const ctx = document.getElementById("profitChart").getContext("2d");
+  if(profitChart) profitChart.destroy();
+  
+  const currentDayIndex = currentDay > 0 ? currentDay - 1 : -1;
+  const pointColors = data.labels.map((_, i) => i === currentDayIndex ? "#e74c3c" : "#8e44ad");
+  const pointRadii = data.labels.map((_, i) => i === currentDayIndex ? 6 : 3);
+
+  profitChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: data.labels,
+      datasets: [
+        {
+          label: "رأس المال التراكمي",
+          data: data.capitals,
+          borderColor: "#8e44ad",
+          backgroundColor: "rgba(142, 68, 173, 0.1)",
+          borderWidth: 3,
+          fill: true,
+          tension: 0.3,
+          pointBackgroundColor: pointColors,
+          pointRadius: pointRadii,
+          pointHoverRadius: 7
+        },
+        {
+          label: "الأرباح اليومية",
+          data: data.profits,
+          borderColor: "#3498db",
+          backgroundColor: "rgba(52, 152, 219, 0.1)",
+          borderWidth: 2,
+          fill: false,
+          tension: 0.3,
+          pointBackgroundColor: pointColors,
+          pointRadius: pointRadii,
+          pointHoverRadius: 7
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "top",
+          labels: {
+            font: {
+              size: 14,
+              family: "'Tajawal', sans-serif"
+            }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              return `${ctx.dataset.label}: ${ctx.raw.toFixed(2)} $`;
+            }
+          },
+          titleFont: {
+            size: 16,
+            family: "'Tajawal', sans-serif"
+          },
+          bodyFont: {
+            size: 14,
+            family: "'Tajawal', sans-serif"
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: false,
+          ticks: {
+            callback: value => `${value.toFixed(2)} $`
+          },
+          grid: {
+            color: "rgba(0, 0, 0, 0.05)"
+          }
+        },
+        x: {
+          grid: {
+            display: false
+          }
+        }
+      },
+      interaction: {
+        intersect: false,
+        mode: 'index'
+      }
+    }
+  });
+}
+
+// تأثير اهتزاز
+document.head.insertAdjacentHTML('beforeend', `
+  <style>
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+  </style>
+`);
+</script>
+</body>
+</html>
